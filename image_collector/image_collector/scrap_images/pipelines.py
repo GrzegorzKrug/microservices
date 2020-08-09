@@ -17,6 +17,7 @@ from io import BytesIO
 import requests
 import hashlib
 import os
+import re
 
 
 class ImageException(FileException):
@@ -37,6 +38,15 @@ class ImageSaver(ImagesPipeline):
                                  (width, height, self.min_width, self.min_height))
 
         area = width * height
+        try:
+            res = re.match(r"https?:\/\/(www\.)?([a-zA-Z\.\-]*)(\.\w+\/)", request.url)
+            domain = res.group(2)  # Full, www, domain, first slash
+        except IndexError as e:
+            self.my_logger.error(f"Could not read domain: {request.url} - {e}")
+            domain = ""
+
+        name = domain + name
+
         if area <= 10_000:
             path = os.path.join("tiny", name)
         elif area <= 50_000:
@@ -47,6 +57,7 @@ class ImageSaver(ImagesPipeline):
             path = os.path.join("big", name)
 
         image, buf = self.convert_image(orig_image)
+
         # path = str(self.title) + path
         self.my_logger.info(f"Saving: {path}")
         yield path, image, buf
