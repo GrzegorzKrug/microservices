@@ -14,7 +14,7 @@ services:
       - ./image_collector/ENV_FILE
     volumes:
 #      - ./image_collector/pictures:/app/pictures
-#      - ./image_collector:/app/image_collector
+      - ./image_collector:/app/image_collector
       - ./image_collector:/app
     depends_on:
       - broker
