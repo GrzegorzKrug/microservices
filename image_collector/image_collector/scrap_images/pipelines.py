@@ -25,8 +25,7 @@ class ImageException(FileException):
 
 
 class ImageSaver(ImagesPipeline):
-    my_logger = define_logger("pipeline", mode='w')
-    my_logger.error("Saver!!")
+    my_logger = define_logger("pipeline", mode='a')
 
     def get_images(self, response, request, info):
         name = self.file_name(request=request, response=response, info=info)
@@ -76,8 +75,7 @@ class ImageSaver(ImagesPipeline):
 
 
 class MyPipeline:
-    my_logger = define_logger("pipeline2", mode='w')
-    my_logger.error("MODE W!!")
+    my_logger = define_logger("my-pipeline", mode='a')
 
     def process_item(self, item, spider):
         self.my_logger.debug(f"Processing {len(ItemAdapter(item).get('image_urls'))} images")

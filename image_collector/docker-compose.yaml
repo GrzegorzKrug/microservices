@@ -18,7 +18,7 @@ services:
     depends_on:
       - broker
     restart: always
-    command: bash -c "mkdir -p pictures && chmod -R 777 pictures && celery -A image_collector worker --loglevel=info --autoscale=10,3"
+    command: bash -c "mkdir -p pictures && chmod -R 777 pictures && celery -A image_collector worker --loglevel=info --autoscale=5,1"
 
   broker:
     image: rabbitmq:3.6.6-management
