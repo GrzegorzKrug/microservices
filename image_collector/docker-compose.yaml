@@ -8,17 +8,30 @@ services:
     image: collector_worker:3.8.5
     environment:
       - HOSTNAME=broker
+      - PORT=5672
       - DB_ACCES_NAME=postgres_db
     env_file:
       - ./image_collector/ENV_FILE
     volumes:
-      - ./pictures:/app/pictures
-      - ./image_collector:/app/image_collector
+#      - ./image_collector/pictures:/app/pictures
+#      - ./image_collector:/app/image_collector
+      - ./image_collector:/app
     depends_on:
       - broker
     restart: always
     #      command: bash -c "python analyzer/celery.py"
-    command: bash -c "chmod -R 777 pictures && celery -A image_collector worker --loglevel=info --autoscale=10,3"
+    command: bash -c "mkdir -p pictures && chmod -R 777 pictures && celery -A image_collector worker --loglevel=info --autoscale=10,3"
+
+  broker:
+    image: rabbitmq:3.6.6-management
+    hostname: broker
+    restart: always
+    environment:
+      - RABBITMQ_DEFAULT_USER=admin
+      - RABBITMQ_DEFAULT_PASS=mypass
+    ports:
+      - "5673:5672"
+      - "15673:15672"
 
   #  beat:
   #    image: collector_worker:3.8.5
@@ -30,14 +43,3 @@ services:
   #      - worker
   #    restart: always
   #    command: celery -A image_collector beat --loglevel=info
-
-  broker:
-    image: rabbitmq:3.6.6-management
-    hostname: rabbit
-    restart: always
-    environment:
-      - RABBITMQ_DEFAULT_USER=admin
-      - RABBITMQ_DEFAULT_PASS=mypass
-    ports:
-      - "5673:5673"
-      - "15673:15673"

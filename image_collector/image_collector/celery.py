@@ -5,9 +5,9 @@ import os
 user = os.getenv('LOGIN', 'admin')
 password = os.getenv('PASSWORD', 'mypass')
 hostname = os.getenv('HOSTNAME', 'localhost')
+port = os.getenv('PORT', '5673')
 
-broker_url = f'amqp://{user}:{password}@{hostname}:5672/'
-
-app = Celery("tasks", broker=broker_url, namespace="image_namespace", include=['image_collector.tasks'])
+broker_url = f'amqp://{user}:{password}@{hostname}:{port}'
+app = Celery("tasks", broker=broker_url, namespace="image_celery", include=['image_collector.tasks'])
 
 __all__ = ("app",)
