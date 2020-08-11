@@ -41,6 +41,8 @@ class ImageSaver(ImagesPipeline):
             res = re.match(r"https?:\/\/(www\.)?([a-zA-Z\.\-]*)(\.\w+\/)", request.url)
             domain = res.group(2)  # Full, www, domain, first slash
             name = domain + '-' + name
+        except AttributeError as e:
+            self.my_logger.error(f"Could not read domain: {request.url} - {e}")
         except IndexError as e:
             self.my_logger.error(f"Could not read domain: {request.url} - {e}")
 

@@ -35,7 +35,7 @@ class ImageSpider(scrapy.Spider):
             im_url = img if img.startswith("http") else "http:" + img
 
             item['image_urls'].append(im_url)
-            self.my_logger.info(f"Got image: {im_url}")
+            self.my_logger.debug(f"Got image: {im_url}")
 
         yield item
 
