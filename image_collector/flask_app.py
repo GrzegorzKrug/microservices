@@ -23,6 +23,8 @@ def show_urls():
     stop = request.args.get('last')
     left = request.args.get('left')
     right = request.args.get('right')
+    if start > stop:
+        start, stop = stop, start
 
     try:
         start = int(start)
@@ -70,6 +72,8 @@ def parser2():
     stop = request.args.get('last')
     left = request.args.get('left')
     right = request.args.get('right')
+    if start > stop:
+        start, stop = stop, start
 
     try:
         start = int(start)
