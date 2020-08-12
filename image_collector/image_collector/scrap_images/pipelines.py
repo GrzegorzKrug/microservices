@@ -46,9 +46,9 @@ class ImageSaver(ImagesPipeline):
         except IndexError as e:
             self.my_logger.error(f"Could not read domain: {request.url} - {e}")
 
-        if area <= 10_000:
+        if area <= 20_000:
             path = os.path.join("tiny", name)
-        elif area <= 50_000:
+        elif area <= 100_000:
             path = os.path.join("small", name)
         elif area <= 500_000:
             path = os.path.join("medium", name)

@@ -30,3 +30,12 @@ services:
     ports:
       - "5673:5672"
       - "15673:15672"
+  web:
+    image: collector_worker:3.8.5
+    volumes:
+      - ./image_collector:/app/image_collector
+      - ./flask_app.py:/app/flask_app.py
+    command: bash -c "python flask_app.py"
+    restart: always
+    ports:
+      - "8080:5000"
