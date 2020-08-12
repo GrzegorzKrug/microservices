@@ -1,0 +1,21 @@
+body{
+  background: Linen;
+  margin-top: 50px;
+  margin-left: 100px;
+  }
+
+p{
+  font-family: Georgia, serif;
+  font-size: 3.0em;
+  }
+
+h1{
+  font-family: Verdana, Geneva, sans-serif;
+  font-size: 2.5em;
+  color: FireBrick;
+  }
+result{
+  font-family: Verdana, Geneva, sans-serif;
+  font-size: 2.5em;
+  color: FireBrick;
+  }
