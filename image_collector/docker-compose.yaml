@@ -2,14 +2,10 @@ version: '3.3'
 
 services:
   worker:
+    image: collector_worker:3.8.5
     build:
       context: .
       dockerfile: Worker
-    image: collector_worker:3.8.5
-    environment:
-      - HOSTNAME=broker
-      - PORT=5672
-      - DB_ACCES_NAME=postgres_db
     env_file:
       - ./image_collector/ENV_FILE
     volumes:
@@ -18,7 +14,7 @@ services:
     depends_on:
       - broker
     restart: always
-    command: bash -c "mkdir -p pictures && chmod -R 777 pictures && celery -A image_collector worker --loglevel=info --autoscale=3,1"
+    command: bash -c "mkdir -p pictures/big pictures/medium pictures/small pictures/tiny && chmod -R 777 pictures && celery -A image_collector worker --loglevel=info --autoscale=3,1"
 
   broker:
     image: rabbitmq:3.6.6-management
@@ -34,8 +30,14 @@ services:
     image: collector_worker:3.8.5
     volumes:
       - ./image_collector:/app/image_collector
+      - ./templates:/app/templates
+      - ./static:/app/static
       - ./flask_app.py:/app/flask_app.py
     command: bash -c "python flask_app.py"
     restart: always
+    env_file:
+      - ./image_collector/ENV_FILE
+    depends_on:
+      - worker
     ports:
-      - "8080:5000"
+      - "5000:5000"

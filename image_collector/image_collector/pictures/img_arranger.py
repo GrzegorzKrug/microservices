@@ -13,7 +13,7 @@ def move_pics(file_list, directory):
     print(f"Moved {len(file_list)} files to {directory}")
 
 
-CAP = 200
+CAP = 100
 for cur_dir in os.listdir():
     if cur_dir not in ['big', 'medium', 'small', 'tiny']:
         continue
