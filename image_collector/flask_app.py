@@ -1,5 +1,6 @@
 from flask import Flask, request, render_template
 from image_collector.tasks import start_spider
+from image_collector.celery import app as cel_app
 import re
 
 # import requests
@@ -7,10 +8,41 @@ import re
 app = Flask(__name__)
 
 
+def get_task_stats():
+    i = cel_app.control.inspect()
+
+    active = 0
+    queue = 0
+
+    act = i.active()
+    for key, val in act.items():
+        active += len(val)
+
+    que = i.reserved()
+    for key, val in que.items():
+        queue += len(val)
+
+    return active, queue
+
+
 @app.route("/")
 def index():
     page = render_template("CreateTask.html")
+    act, que = get_task_stats()
+    page += f"<p>Active: {act}</p>"
+    page += f"<p>Queue: {que}</p>"
     return page
+
+
+# @app.route("/tasks")
+# def tasks():
+#     print("Loading tasks que")
+#     page = ""
+#     # print(dir(cel_app.control.inspect))
+#     act, que = get_task_stats()
+#     page += f"<p>Active: {act}</p>"
+#     page += f"<p>Queue: {que}</p>"
+#     return page
 
 
 @app.route("/show_urls")
@@ -23,29 +55,32 @@ def show_urls():
     stop = request.args.get('last')
     left = request.args.get('left')
     right = request.args.get('right')
-    if start > stop:
-        start, stop = stop, start
 
-    try:
-        start = int(start)
-        stop = int(stop)
-    except ValueError as ve:
-        return page + f"invalid parameter: {ve}"
-    except TypeError as ve:
-        return page + f"empty parameter: {ve}"
     out = "Generated urls:"
 
-    for num in range(start, stop + 1):
-        out += f"<p>{left}{num}{right}</p>"
+    for url, error in generate_urls(start, stop, left, right):
+        out += f"<p>{url}</p>"
 
     page += out
     return page
 
 
-# @app.route("/hello")
-# def hello():
-#     pag = "<div>Hello word</div>"
-#     return pag
+def generate_urls(start, stop, left, right):
+    try:
+        start = int(start)
+        stop = int(stop)
+        if start > stop:
+            start, stop = stop, start
+
+    except ValueError as ve:
+        yield f"invalid parameter: {ve}", True
+
+    except TypeError as err:
+        yield f"empty parameter: {err}", True
+    else:
+        for num in range(start, stop + 1):
+            yield f"{left}{num}{right}", False
+
 
 @app.route("/parser1")
 def parser1():
@@ -61,7 +96,7 @@ def parser1():
             start_spider.delay(url=u)
         except Exception as er:
             print(f"{er}")
-            out += f" {ce}"
+            out += f" {er}"
         out += "</p>"
     return f"<div classname=result>{out}</div>"
 
@@ -72,22 +107,19 @@ def parser2():
     stop = request.args.get('last')
     left = request.args.get('left')
     right = request.args.get('right')
-    if start > stop:
-        start, stop = stop, start
-
-    try:
-        start = int(start)
-        stop = int(stop)
-    except ValueError as ve:
-        return f"invalid parameter: {ve}"
-    except TypeError as ve:
-        return f"empty parameter: {ve}"
 
     out = "Parsing urls:"
-    for num in range(start, stop + 1):
-        cur_url = f"{left}{num}{right}"
-        start_spider.delay(url=cur_url)
-        out += f"<p>{cur_url}</p>"
+    for cur_url, error in generate_urls(start, stop, left, right):
+        try:
+            if not error:
+                start_spider.delay(url=cur_url)
+            else:
+                out += f"<p>{cur_url}</p>"
+        except Exception as er:
+            print(f"{er}")
+            out += f"<p>{cur_url} {er}</p>"
+        else:
+            out += f"<p>{cur_url}</p>"
 
     return out
 
